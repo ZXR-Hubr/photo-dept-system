@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光影 · 企业摄影部工作平台</title>
+<style>
+:root{
+  --bg:#f4f6fb; --panel:#ffffff; --ink:#1f2740; --muted:#7b849c; --line:#e6e9f2;
+  --brand:#3d5afe; --brand2:#6c63ff; --brand-soft:#eef1ff;
+  --ok:#12a06a; --ok-soft:#e6f7ef; --warn:#e0912f; --warn-soft:#fdf3e4;
+  --danger:#e04a4a; --danger-soft:#fdecec; --info:#2f8fe0; --info-soft:#e8f3fd;
+  --shadow:0 2px 14px rgba(31,39,64,.07); --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.55}
+.app{display:flex;min-height:100vh}
+/* ---------- Sidebar ---------- */
+.side{width:238px;flex:0 0 238px;background:#141b33;color:#cdd4e8;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:11px;padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#5b6cff,#9d6bff);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.brand .logo svg{width:22px;height:22px;stroke:#fff}
+.brand h1{font-size:16px;color:#fff;font-weight:600;letter-spacing:.5px}
+.brand p{font-size:11px;color:#8b95b5;margin-top:1px}
+.nav{padding:14px 12px;overflow-y:auto;flex:1}
+.nav .group{font-size:11px;color:#6d7898;text-transform:uppercase;letter-spacing:1px;padding:14px 10px 8px}
+.nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;color:#b9c2dc;text-decoration:none;margin-bottom:3px;cursor:pointer;transition:.15s;font-size:14px}
+.nav a svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;flex:0 0 auto}
+.nav a:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav a.on{background:linear-gradient(135deg,#3d5afe,#6c5ce7);color:#fff;box-shadow:0 6px 16px rgba(61,90,254,.35)}
+.nav .badge{margin-left:auto;background:rgba(255,255,255,.16);border-radius:20px;font-size:11px;padding:1px 8px}
+.side-foot{padding:16px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#7b86a6}
+.side-foot .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#38d39f;margin-right:7px}
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:66px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 26px;position:sticky;top:0;z-index:20}
+.top .crumb{font-size:15px;font-weight:600}
+.top .crumb small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
+.top .spacer{flex:1}
+.search{position:relative;width:260px}
+.search input{width:100%;border:1px solid var(--line);background:#f8f9fd;border-radius:9px;padding:9px 12px 9px 36px;font-size:13px;outline:none;transition:.2s}
+.search input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-soft)}
+.search svg{position:absolute;left:11px;top:10px;width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2}
+.iconbtn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.15s}
+.iconbtn:hover{border-color:var(--brand);background:var(--brand-soft)}
+.iconbtn svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.9}
+.iconbtn .n{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:10px;border-radius:10px;padding:1px 5px}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#7b8cff,#b06bff);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;cursor:pointer}
+.content{padding:24px 26px 40px;flex:1}
+.view{display:none;animation:fade .25s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---------- Shared ---------- */
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.pagehead h2{font-size:21px;font-weight:600}
+.pagehead p{color:var(--muted);font-size:13px;margin-top:3px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 15px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.15s;font-family:inherit}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.primary:hover{background:#2f4ae0;color:#fff}
+.btn.danger{color:var(--danger)}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:20px}
+.muted{color:var(--muted)}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat .ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat .ic svg{width:21px;height:21px;stroke-width:2;fill:none}
+.stat .num{font-size:28px;font-weight:700;line-height:1.1}
+.stat .lbl{color:var(--muted);font-size:13px;margin-top:4px}
+.stat .trend{font-size:11px;margin-top:8px;color:var(--muted)}
+.stat .trend b{color:var(--ok)}
+.i-blue{background:var(--brand-soft);color:var(--brand)}
+.i-green{background:var(--ok-soft);color:var(--ok)}
+.i-orange{background:var(--warn-soft);color:var(--warn)}
+.i-purple{background:#f1ecff;color:#8759e0}
+/* dashboard grid */
+.dashgrid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px}
+.dashgrid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sec-title{font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sec-title .more{font-size:12px;color:var(--brand);cursor:pointer;font-weight:400}
+/* table */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid #f0f2f8;font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafbff}
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;white-space:nowrap}
+.t-blue{background:var(--info-soft);color:var(--info)}
+.t-green{background:var(--ok-soft);color:var(--ok)}
+.t-orange{background:var(--warn-soft);color:var(--warn)}
+.t-red{background:var(--danger-soft);color:var(--danger)}
+.t-purple{background:#f1ecff;color:#8759e0}
+.t-gray{background:#eef0f5;color:#6b7490}
+.act{display:flex;gap:6px}
+.act button{border:none;background:none;color:var(--brand);cursor:pointer;font-size:12px;padding:3px 5px;font-family:inherit}
+.act button:hover{text-decoration:underline}
+.act button.del{color:var(--danger)}
+/* filters */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:13px;background:#fff;font-family:inherit;outline:none}
+.filters input:focus,.filters select:focus{border-color:var(--brand)}
+.filters input[type=search]{min-width:220px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{padding:6px 13px;border-radius:20px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;color:var(--muted)}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+/* progress */
+.bar{height:6px;background:#eef0f6;border-radius:6px;overflow:hidden;width:100%}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:6px}
+/* assets grid */
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:15px}
+.acard{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;cursor:pointer;transition:.18s}
+.acard:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(31,39,64,.13)}
+.acard .thumb{height:132px;background:#eef0f6 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.acard .thumb .vbadge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;padding:2px 7px;border-radius:10px}
+.acard .meta{padding:11px 12px}
+.acard .meta h4{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acard .meta p{font-size:11px;color:var(--muted);margin-top:3px}
+.uploadzone{border:2px dashed #cbd3e8;border-radius:12px;padding:22px;text-align:center;color:var(--muted);cursor:pointer;transition:.2s;margin-bottom:18px}
+.uploadzone:hover{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+.uploadzone svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.7;margin-bottom:6px}
+/* calendar */
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calgrid .dow{text-align:center;font-size:12px;color:var(--muted);padding:6px}
+.calcell{min-height:92px;border:1px solid var(--line);border-radius:9px;padding:7px;background:#fff;cursor:pointer;transition:.15s}
+.calcell:hover{border-color:var(--brand);background:#fafbff}
+.calcell.other{background:#fafbfd;color:#b9c0d2}
+.calcell.today{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.calcell .d{font-size:12px;font-weight:600;margin-bottom:5px}
+.calcell .ev{font-size:10px;background:var(--brand-soft);color:var(--brand);border-radius:4px;padding:2px 4px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(20,27,51,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(2px)}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+.modal.wide{max-width:820px}
+.modal .mh{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2}
+.modal .mh h3{font-size:17px;font-weight:600}
+.modal .mb{padding:22px 24px}
+.modal .mf{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff}
+.x{width:30px;height:30px;border-radius:8px;border:none;background:#f2f4f9;cursor:pointer;font-size:18px;color:var(--muted)}
+.x:hover{background:#e8ebf2}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f.full{grid-column:1/-1}
+.f label{font-size:12px;color:var(--muted);font-weight:500}
+.f input,.f select,.f textarea{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;outline:none;background:#fff;color:var(--ink)}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.f textarea{resize:vertical;min-height:74px}
+/* detail drawer */
+.detailkv{display:grid;grid-template-columns:100px 1fr;gap:11px 14px;font-size:13px;margin-bottom:18px}
+.detailkv .k{color:var(--muted)}
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2740;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:.28s;z-index:200;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* charts */
+.chartwrap{position:relative;height:230px}
+.chartwrap svg{width:100%;height:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.empty{text-align:center;padding:46px 20px;color:var(--muted)}
+.empty svg{width:46px;height:46px;stroke:#c3c9d9;fill:none;stroke-width:1.5;margin-bottom:10px}
+@media(max-width:980px){.side{position:fixed;left:-238px;z-index:60;transition:.2s}.side.open{left:0}.stats{grid-template-columns:repeat(2,1fr)}.dashgrid,.dashgrid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side" id="side">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+    <div><h1>光影摄影部</h1><p>企业宣传 · 工作平台</p></div>
+  </div>
+  <nav class="nav">
+    <div class="group">工作区</div>
+    <a data-v="dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>工作台</a>
+    <a data-v="orders"><svg viewBox="0 0 24 24"><path d="M9 5H5v4m10-4h4v4M9 19H5v-4m10 4h4v-4"/><rect x="9" y="9" width="6" height="6"/></svg>拍摄工单<span class="badge" id="navOrders">0</span></a>
+    <a data-v="assets"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L6 20"/></svg>素材资产库</a>
+    <a data-v="plans"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>拍摄计划</a>
+    <div class="group">资源</div>
+    <a data-v="staff"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8a3.5 3.5 0 010 7M17 14c2.2.6 4 2.6 4 5"/></svg>摄影师</a>
+    <a data-v="equip"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V4h8v3M4 12h16"/></svg>设备台账</a>
+    <a data-v="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>数据统计</a>
+    <div class="group">系统</div>
+    <a data-v="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.4-2.4 1a7 7 0 00-1.7-1L14.5 3h-4l-.3 2.1a7 7 0 00-1.7 1l-2.4-1-2 3.4L6 11a7 7 0 000 2l-2 1.5 2 3.4 2.4-1a7 7 0 001.7 1l.3 2.1h4l.3-2.1a7 7 0 001.7-1l2.4 1 2-3.4-2-1.5a7 7 0 00.1-1z"/></svg>数据与设置</a>
+  </nav>
+  <div class="side-foot"><span class="dot"></span>云端数据库已连接</div>
+</aside>
+
+<div class="main">
+  <header class="top">
+    <button class="iconbtn" id="menuBtn" style="display:none"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <div class="crumb" id="crumb">工作台<small id="crumbSub">总览与快捷入口</small></div>
+    <div class="spacer"></div>
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="globalSearch" placeholder="全局搜索工单、素材…"></div>
+    <button class="iconbtn" id="btnExport" title="导出数据备份"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg></button>
+    <div class="avatar" title="管理员">管</div>
+  </header>
+
+  <main class="content">
+    <!-- ========== 工作台 ========== -->
+    <section class="view on" id="v-dash">
+      <div class="pagehead"><div><h2>工作台</h2><p id="todayTxt">今日概览</p></div><button class="btn primary" onclick="openOrder()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建拍摄工单</button></div>
+      <div class="stats" id="dashStats"></div>
+      <div class="dashgrid">
+        <div class="card pad">
+          <div class="sec-title">近期拍摄工单 <span class="more" onclick="go('orders')">查看全部 →</span></div>
+          <div id="recentOrders"></div>
+        </div>
+        <div class="card pad">
+          <div class="sec-title">工单状态分布</div>
+          <div class="chartwrap" id="statusChart"></div>
+        </div>
+      </div>
+      <div class="dashgrid2">
+        <div class="card pad">
+          <div class="sec-title">近期动态</div>
+          <div id="recentActivity"></div>
+        </div>
+        <div class="card pad">
+          <div class="sec-title">本月拍摄类型</div>
+          <div class="chartwrap" id="typeChart"></div>
+          <div class="legend" id="typeLegend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 拍摄工单 ========== -->
+    <section class="view" id="v-orders">
+      <div class="pagehead"><div><h2>拍摄工单</h2><p>管理从需求受理到成片交付的完整流程</p></div><div style="display:flex;gap:9px"><button class="btn" onclick="exportOrdersCSV()"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>导出CSV</button><button class="btn primary" onclick="openOrder()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建工单</button></div></div>
+      <div class="card pad">
+        <div class="filters">
+          <input type="search" id="ordSearch" placeholder="搜索标题、申请人、部门…" oninput="renderOrders()">
+          <select id="ordStatus" onchange="renderOrders()"><option value="">全部状态</option><option>待受理</option><option>已排期</option><option>拍摄中</option><option>后期制作</option><option>已完成</option><option>已取消</option></select>
+          <select id="ordPriority" onchange="renderOrders()"><option value="">全部优先级</option><option>高</option><option>中</option><option>低</option></select>
+          <span class="muted" id="ordCount" style="margin-left:auto;font-size:12px"></span>
+        </div>
+        <div style="overflow-x:auto"><table><thead><tr><th>工单编号</th><th>拍摄主题</th><th>申请部门</th><th>类型</th><th>优先级</th><th>状态</th><th>负责人</th><th>截止日期</th><th>进度</th><th>操作</th></tr></thead><tbody id="ordBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ========== 素材资产库 ========== -->
+    <section class="view" id="v-assets">
+      <div class="pagehead"><div><h2>素材资产库</h2><p>集中管理拍摄图片与视频，支持标签检索</p></div><button class="btn primary" onclick="document.getElementById('fileInput').click()"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v4h16v-4"/></svg>上传素材</button></div>
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none">
+      <div class="card pad">
+        <div class="uploadzone" onclick="document.getElementById('fileInput').click()"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v4h16v-4"/></svg><div>点击选择或拖拽图片、视频到此处上传</div></div>
+        <div class="filters">
+          <input type="search" id="assetSearch" placeholder="搜索文件名、标签…" oninput="renderAssets()">
+          <select id="assetCat" onchange="renderAssets()"><option value="">全部类型</option><option>产品摄影</option><option>活动纪实</option><option>人物肖像</option><option>场景空间</option><option>视频</option></select>
+          <span class="muted" id="assetCount" style="margin-left:auto;font-size:12px"></span>
+        </div>
+        <div class="agrid" id="assetGrid"></div>
+      </div>
+    </section>
+
+    <!-- ========== 拍摄计划 ========== -->
+    <section class="view" id="v-plans">
+      <div class="pagehead"><div><h2>拍摄计划</h2><p>日历视图安排拍摄任务与人员</p></div><button class="btn primary" onclick="openPlan()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新建计划</button></div>
+      <div class="card pad">
+        <div class="calhead"><button class="btn sm" onclick="calMove(-1)">‹ 上月</button><h3 id="calTitle">—</h3><button class="btn sm" onclick="calMove(1)">下月 ›</button></div>
+        <div class="calgrid" id="calGrid"></div>
+      </div>
+      <div class="card pad" style="margin-top:16px">
+        <div class="sec-title">计划列表 <span class="muted" id="planCount" style="font-size:12px;font-weight:400"></span></div>
+        <div style="overflow-x:auto"><table><thead><tr><th>日期</th><th>时间</th><th>主题</th><th>地点</th><th>负责人</th><th>关联工单</th><th>状态</th><th>操作</th></tr></thead><tbody id="planBody"></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ========== 摄影师 ========== -->
+    <section class="view" id="v-staff">
+      <div class="pagehead"><div><h2>摄影师团队</h2><p>团队成员、专长与工作状态</p></div><button class="btn primary" onclick="openStaff()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加成员</button></div>
+      <div class="agrid" id="staffGrid"></div>
+    </section>
+
+    <!-- ========== 设备台账 ========== -->
+    <section class="view" id="v-equip">
+      <div class="pagehead"><div><h2>设备台账</h2><p>摄影器材登记与借用状态</p></div><button class="btn primary" onclick="openEquip()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>添加设备</button></div>
+      <div class="card pad"><div style="overflow-x:auto"><table><thead><tr><th>设备名称</th><th>类别</th><th>型号</th><th>序列号</th><th>状态</th><th>当前持有人</th><th>购入日期</th><th>操作</th></tr></thead><tbody id="equipBody"></tbody></table></div></div>
+    </section>
+
+    <!-- ========== 数据统计 ========== -->
+    <section class="view" id="v-stats">
+      <div class="pagehead"><div><h2>数据统计</h2><p>工单、素材与团队的多维分析</p></div></div>
+      <div class="stats" id="statStats"></div>
+      <div class="dashgrid">
+        <div class="card pad"><div class="sec-title">近 6 个月工单趋势</div><div class="chartwrap" id="trendChart"></div></div>
+        <div class="card pad"><div class="sec-title">拍摄类型占比</div><div class="chartwrap" id="pieChart"></div><div class="legend" id="pieLegend"></div></div>
+      </div>
+      <div class="card pad" style="margin-top:16px"><div class="sec-title">各部门工单量</div><div class="chartwrap" id="deptChart"></div></div>
+    </section>
+
+    <!-- ========== 设置 ========== -->
+    <section class="view" id="v-settings">
+      <div class="pagehead"><div><h2>数据与设置</h2><p>备份、恢复云端数据库</p></div></div>
+      <div class="card pad" style="max-width:720px">
+        <div class="sec-title">数据库信息</div>
+        <div class="detailkv" id="dbInfo"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn" onclick="exportBackup()"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>导出完整备份</button>
+          <button class="btn" onclick="document.getElementById('importFile').click()"><svg viewBox="0 0 24 24"><path d="M12 17V5m0 0L8 9m4-4l4 4M4 17v3h16v-3"/></svg>导入备份</button>
+          <button class="btn" onclick="loadSeed()"><svg viewBox="0 0 24 24"><path d="M12 3v14m0 0l-5-5m5 5l5-5M4 21h16"/></svg>重新载入示例数据</button>
+          <button class="btn danger" onclick="clearAll()"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/></svg>清空全部数据</button>
+        </div>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
+        <p class="muted" style="margin-top:18px;font-size:12px;line-height:1.7">说明：所有数据保存在服务端 SQLite 数据库中，属于云端持久化，刷新、换设备或换浏览器均可访问同一份数据，团队成员之间实时共享。建议定期导出备份。</p>
+      </div>
+    </section>
+  </main>
+</div>
+</div>
+
+<!-- modals -->
+<div class="mask" id="mask" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="mask" id="viewMask" onclick="if(event.target===this)closeView()"><div class="modal" id="viewModal"></div></div>
+<div id="toast"></div>
+
+<script>
+/* ==================== 后端 API 数据层 ==================== */
+const STORES=['orders','assets','plans','staff','equip','activity'];
+/* API 根地址：默认同源（前端与后端同域部署）；如需独立后端域名，在页面头部设置 window.API_BASE */
+const API_BASE = (window.API_BASE || '').replace(/\/$/,'');
+
+async function api(path, opts){
+  const r = await fetch(API_BASE + '/api/' + path, opts);
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error('API '+r.status);
+  return r.json();
+}
+async function openDB(){ await api('health'); }              /* 保留函数名：探测后端就绪 */
+async function tx(){ return null; }                          /* 兼容占位：业务代码不直接使用 */
+async function put(store,obj){ return api(store,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)}); }
+async function del(store,id){ await api(store+'/'+encodeURIComponent(id),{method:'DELETE'}); }
+async function get(store,id){ return api(store+'/'+encodeURIComponent(id)); }
+async function all(store){ return (await api(store+'/all')) || []; }
+async function clearStore(store){ await api(store,{method:'DELETE'}); }
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function today(){return new Date().toISOString().slice(0,10);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2200);}
+async function log(action,detail){await put('activity',{id:uid(),action,detail,at:new Date().toLocaleString('zh-CN')});}
+
+/* ==================== 示例数据 ==================== */
+const STATUS_FLOW=['待受理','已排期','拍摄中','后期制作','已完成'];
+function seedData(){
+  const now=new Date();
+  const d=(off)=>{const x=new Date(now);x.setDate(x.getDate()+off);return x.toISOString().slice(0,10);};
+  const orders=[
+    ['新品发布会主视觉拍摄','市场部','张伟','产品摄影','高','后期制作','林峰',-2,'品牌发布会主KV与产品特写，需 20+ 成片'],
+    ['企业宣传片素材采集','品牌部','李娜','视频','高','拍摄中','陈曦',0,'collect 公司环境、员工访谈、生产线空镜'],
+    ['年度人物专访肖像','人力资源部','王芳','人物肖像','中','已排期','林峰',3,'高管团队 8 人肖像，商务风格'],
+    ['办公空间环境摄影','行政部','赵敏','场景空间','低','待受理','待分配',6,'新办公区环境图用于官网'],
+    ['双十一活动纪实','电商部','刘洋','活动纪实','中','已完成','陈曦',-8,'大促现场纪实跟拍'],
+    ['产品包装静物图','产品部','孙倩','产品摄影','中','后期制作','周桐',-1,'新品包装多角度静物拍摄'],
+    ['客户答谢会跟拍','客户成功部','何静','活动纪实','高','已排期','周桐',5,'年度客户答谢会全程跟拍'],
+    ['创始人 IP 形象照','品牌部','李娜','人物肖像','高','待受理','待分配',8,'创始人个人品牌形像照'],
+    ['工厂生产线纪实','供应链部','吴刚','活动纪实','低','已完成','林峰',-15,'生产线作业纪实素材'],
+    ['节日营销海报拍摄','市场部','张伟','场景空间','中','拍摄中','陈曦',1,'中秋主题营销海报场景拍摄']
+  ].map((r,i)=>({id:'O'+(1001+i),code:'PW-2026-'+(1001+i),title:r[0],dept:r[1],applicant:r[2],type:r[3],priority:r[4],status:r[5],assignee:r[6],dueDate:d(r[7]),description:r[8],createdAt:d(r[7]-10),updatedAt:d(r[7]-2)}));
+  const plans=[
+    ['企业宣传片素材采集','拍摄中',0,'09:00','总部大楼','陈曦'],
+    ['节日营销海报拍摄','待拍摄',1,'14:00','一号影棚','陈曦'],
+    ['年度人物专访肖像','待拍摄',3,'10:00','会议室 A','林峰'],
+    ['客户答谢会跟拍','待拍摄',5,'13:30','国际会展中心','周桐'],
+    ['新品发布会主视觉补拍','待拍摄',-1,'15:00','三号影棚','林峰']
+  ].map((r,i)=>({id:'P'+(2001+i),title:r[0],status:r[1],date:d(r[2]),time:r[3],location:r[4],assignee:r[5],crew:'',note:''}));
+  const staff=[
+    ['林峰','首席摄影师','138****1024',['产品摄影','人物肖像'],'在岗'],
+    ['陈曦','高级摄影师','139****3088',['活动纪实','视频'],'在岗'],
+    ['周桐','摄影师','137****5520',['活动纪实','场景空间'],'在岗'],
+    ['苏念','后期修图师','136****7741',['后期制作','产品摄影'],'在岗'],
+    ['郑凯','视频剪辑师','135****2298',['视频','后期制作'],'外勤']
+  ].map((r,i)=>({id:'S'+(3001+i),name:r[0],role:r[1],phone:r[2],skills:r[3],status:r[4]}));
+  const equip=[
+    ['佳能 EOS R5','相机','R5','CN-R5-2024-001','可用','—','2024-03-12'],
+    ['索尼 A7M4','相机','A7M4','SO-A7-2023-018','借出','陈曦','2023-08-20'],
+    ['24-70mm f/2.8','镜头','RF 24-70','CN-L-2024-007','可用','—','2024-03-12'],
+    ['大疆稳定器 RS3','配件','RS3','DJ-RS3-2025-003','可用','—','2025-01-10'],
+    ['影棚闪光灯组','灯光','SL-600','LT-2023-022','维修中','—','2023-05-06'],
+    ['无人机 Mavic 3','航拍','Mavic3','DJ-M3-2025-011','借出','林峰','2025-06-18']
+  ].map((r,i)=>({id:'E'+(4001+i),name:r[0],category:r[1],model:r[2],serial:r[3],status:r[4],holder:r[5],purchaseDate:r[6]}));
+  const acts=[
+    ['更新工单状态','PW-2026-1001 进入「后期制作」'],
+    ['上传素材','新品发布会主视觉_03.jpg'],
+    ['新建拍摄计划','企业宣传片素材采集'],
+    ['添加设备','影棚闪光灯组']
+  ].map((r,i)=>({id:'A'+(5001+i),action:r[0],detail:r[1],at:new Date(Date.now()-i*3600e3).toLocaleString('zh-CN')}));
+  return {orders,plans,staff,equip,activity:acts};
+}
+
+async function loadSeed(){
+  if(!confirm('重新载入示例数据？这会覆盖当前所有工单、计划、人员、设备与动态（素材保留）。'))return;
+  for(const s of ['orders','plans','staff','equip','activity']) await clearStore(s);
+  const d=seedData();
+  for(const s of Object.keys(d)) for(const o of d[s]) await put(s,o);
+  toast('示例数据已载入');refreshAll();
+}
+async function clearAll(){
+  if(!confirm('确定清空全部数据？此操作不可恢复，建议先导出备份。'))return;
+  for(const s of STORES) await clearStore(s);
+  toast('已清空全部数据');refreshAll();
+}
+
+/* ==================== 导航 ==================== */
+const TITLES={dash:['工作台','总览与快捷入口'],orders:['拍摄工单','需求受理到成片交付'],assets:['素材资产库','图片与视频集中管理'],plans:['拍摄计划','日历排期与人员安排'],staff:['摄影师团队','成员专长与状态'],equip:['设备台账','器材登记与借用'],stats:['数据统计','多维分析报表'],settings:['数据与设置','备份与恢复']};
+let curView='dash';
+function go(v){
+  curView=v;
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  document.getElementById('crumb').firstChild.nodeValue=TITLES[v][0];
+  document.getElementById('crumbSub').textContent=TITLES[v][1];
+  document.getElementById('side').classList.remove('open');
+  if(v==='dash')renderDash();
+  if(v==='orders')renderOrders();
+  if(v==='assets')renderAssets();
+  if(v==='plans'){renderCalendar();renderPlans();}
+  if(v==='staff')renderStaff();
+  if(v==='equip')renderEquip();
+  if(v==='stats')renderStats();
+  if(v==='settings')renderDbInfo();
+}
+document.querySelectorAll('.nav a').forEach(a=>a.onclick=()=>go(a.dataset.v));
+document.getElementById('menuBtn').onclick=()=>document.getElementById('side').classList.toggle('open');
+
+/* ==================== 工作台 ==================== */
+async function renderDash(){
+  const orders=await all('orders'),assets=await all('assets'),staff=await all('staff');
+  const pending=orders.filter(o=>o.status==='待受理').length;
+  const doing=orders.filter(o=>['拍摄中','后期制作'].includes(o.status)).length;
+  const done=orders.filter(o=>o.status==='已完成').length;
+  const month=assets.filter(a=>(a.createdAt||'').slice(0,7)===new Date().toISOString().slice(0,7)).length;
+  const cards=[
+    ['工单总数',orders.length,'i-blue','<rect x="9" y="5" width="6" height="14" rx="1"/><path d="M9 9h6M9 13h6"/>',`本月新增 <b>${orders.filter(o=>(o.createdAt||'').slice(0,7)===new Date().toISOString().slice(0,7)).length}</b>`],
+    ['待受理',pending,'i-orange','<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',`需尽快安排`],
+    ['进行中',doing,'i-purple','<path d="M4 12a8 8 0 0114-5M20 12a8 8 0 01-14 5M18 3v4h-4M6 21v-4h4"/>',`拍摄与后期阶段`],
+    ['素材总量',assets.length,'i-green','<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/>',`本月上传 <b>${month}</b>`]
+  ];
+  document.getElementById('dashStats').innerHTML=cards.map(c=>`<div class="stat"><div class="ic ${c[2]}"><svg viewBox="0 0 24 24">${c[3]}</svg></div><div class="num">${c[1]}</div><div class="lbl">${c[0]}</div><div class="trend">${c[4]}</div></div>`).join('');
+  // recent orders
+  const recent=[...orders].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,6);
+  document.getElementById('recentOrders').innerHTML=recent.length?`<table><tbody>${recent.map(o=>`<tr><td><b>${esc(o.code)}</b><div class="muted" style="font-size:11px">${esc(o.title)}</div></td><td>${statusTag(o.status)}</td><td>${esc(o.assignee)}</td><td class="muted">${esc(o.dueDate)}</td></tr>`).join('')}</tbody></table>`:emptyHtml('暂无工单');
+  // status donut
+  const sc={};orders.forEach(o=>sc[o.status]=(sc[o.status]||0)+1);
+  drawDonut('statusChart',sc);
+  // activity
+  const acts=await all('activity');
+  const ra=[...acts].sort((a,b)=>(b.at||'').localeCompare(a.at||'')).slice(0,5);
+  document.getElementById('recentActivity').innerHTML=ra.length?ra.map(a=>`<div style="display:flex;gap:11px;padding:9px 0;border-bottom:1px solid #f0f2f8"><div style="width:8px;height:8px;border-radius:50%;background:var(--brand);margin-top:6px;flex:0 0 auto"></div><div><div style="font-size:13px">${esc(a.action)} · ${esc(a.detail)}</div><div class="muted" style="font-size:11px">${esc(a.at)}</div></div></div>`).join(''):emptyHtml('暂无动态');
+  // type chart
+  const tc={};orders.forEach(o=>tc[o.type]=(tc[o.type]||0)+1);
+  drawBars('typeChart',tc);
+  document.getElementById('typeLegend').innerHTML=Object.entries(tc).map(([k],i)=>`<span><i style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></i>${esc(k)}</span>`).join('');
+  document.getElementById('todayTxt').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'})+' · 共 '+staff.filter(s=>s.status==='在岗').length+' 人在岗';
+  document.getElementById('navOrders').textContent=orders.length;
+}
+
+/* ==================== 工单 ==================== */
+function statusTag(s){const m={'待受理':'t-orange','已排期':'t-blue','拍摄中':'t-purple','后期制作':'t-blue','已完成':'t-green','已取消':'t-gray'};return `<span class="tag ${m[s]||'t-gray'}">${esc(s)}</span>`;}
+function prioTag(p){const m={'高':'t-red','中':'t-orange','低':'t-gray'};return `<span class="tag ${m[p]||'t-gray'}">${esc(p)}</span>`;}
+async function renderOrders(){
+  const orders=await all('orders');
+  const q=(document.getElementById('ordSearch').value||'').toLowerCase();
+  const st=document.getElementById('ordStatus').value, pr=document.getElementById('ordPriority').value;
+  let list=orders.filter(o=>(!st||o.status===st)&&(!pr||o.priority===pr)&&(!q||[o.code,o.title,o.applicant,o.dept].join(' ').toLowerCase().includes(q)));
+  list.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  document.getElementById('ordCount').textContent=`共 ${list.length} 条工单`;
+  document.getElementById('ordBody').innerHTML=list.length?list.map(o=>{
+    const idx=STATUS_FLOW.indexOf(o.status);const pct=o.status==='已取消'?0:idx<0?0:Math.round((idx+1)/STATUS_FLOW.length*100);
+    return `<tr><td><b>${esc(o.code)}</b></td><td><b>${esc(o.title)}</b><div class="muted" style="font-size:11px">${esc(o.applicant)}</div></td><td>${esc(o.dept)}</td><td>${esc(o.type)}</td><td>${prioTag(o.priority)}</td><td>${statusTag(o.status)}</td><td>${esc(o.assignee)}</td><td class="muted">${esc(o.dueDate)}</td><td><div class="bar" style="width:70px"><i style="width:${pct}%"></i></div></td><td><div class="act"><button onclick="viewOrder('${o.id}')">详情</button><button onclick="openOrder('${o.id}')">编辑</button><button class="del" onclick="removeOrder('${o.id}')">删除</button></div></td></tr>`;
+  }).join(''):`<tr><td colspan="10">${emptyHtml('没有符合条件的工单')}</td></tr>`;
+}
+function openOrder(id){
+  openModal(id?'编辑拍摄工单':'新建拍摄工单',`
+    <div class="formgrid">
+      <div class="f full"><label>拍摄主题 *</label><input id="f_title" placeholder="例如：新品发布会主视觉拍摄"></div>
+      <div class="f"><label>申请部门</label><input id="f_dept" placeholder="例如：市场部"></div>
+      <div class="f"><label>申请人</label><input id="f_applicant"></div>
+      <div class="f"><label>拍摄类型</label><select id="f_type"><option>产品摄影</option><option>活动纪实</option><option>人物肖像</option><option>场景空间</option><option>视频</option></select></div>
+      <div class="f"><label>优先级</label><select id="f_priority"><option>中</option><option>高</option><option>低</option></select></div>
+      <div class="f"><label>状态</label><select id="f_status">${STATUS_FLOW.concat(['已取消']).map(s=>`<option>${s}</option>`).join('')}</select></div>
+      <div class="f"><label>负责人</label><input id="f_assignee" placeholder="摄影师姓名"></div>
+      <div class="f"><label>截止日期</label><input type="date" id="f_dueDate" value="${today()}"></div>
+      <div class="f full"><label>需求说明</label><textarea id="f_description" placeholder="拍摄内容、数量、风格要求等"></textarea></div>
+    </div>`,async()=>{
+    const title=document.getElementById('f_title').value.trim();
+    if(!title){toast('请填写拍摄主题');return false;}
+    const data={title,dept:document.getElementById('f_dept').value.trim(),applicant:document.getElementById('f_applicant').value.trim(),type:document.getElementById('f_type').value,priority:document.getElementById('f_priority').value,status:document.getElementById('f_status').value,assignee:document.getElementById('f_assignee').value.trim(),dueDate:document.getElementById('f_dueDate').value,description:document.getElementById('f_description').value.trim(),updatedAt:today()};
+    if(id){const o=await get('orders',id);Object.assign(o,data);await put('orders',o);await log('编辑工单',o.code+' '+o.title);}
+    else{const n=Date.now()%9000+1000;await put('orders',{id:uid(),code:'PW-2026-'+n,...data,createdAt:today()});await log('新建工单',data.title);}
+    toast(id?'工单已更新':'工单已创建');closeModal();renderOrders();refreshBadge();return true;
+  });
+  if(id){get('orders',id).then(o=>{if(!o)return;['title','dept','applicant','type','priority','status','assignee','dueDate','description'].forEach(k=>{const el=document.getElementById('f_'+k);if(el)el.value=o[k]||'';});});}
+}
+async function viewOrder(id){
+  const o=await get('orders',id);if(!o)return;
+  const idx=STATUS_FLOW.indexOf(o.status);
+  const next=idx>=0&&idx<STATUS_FLOW.length-1?`<button class="btn primary" onclick="advanceOrder('${o.id}')">推进到「${STATUS_FLOW[idx+1]}」</button>`:'';
+  openView('工单详情 · '+o.code,`
+    <div class="detailkv">
+      <div class="k">拍摄主题</div><div><b>${esc(o.title)}</b></div>
+      <div class="k">状态</div><div>${statusTag(o.status)}</div>
+      <div class="k">优先级</div><div>${prioTag(o.priority)}</div>
+      <div class="k">申请部门</div><div>${esc(o.dept)}</div>
+      <div class="k">申请人</div><div>${esc(o.applicant)}</div>
+      <div class="k">拍摄类型</div><div>${esc(o.type)}</div>
+      <div class="k">负责人</div><div>${esc(o.assignee)}</div>
+      <div class="k">截止日期</div><div>${esc(o.dueDate)}</div>
+      <div class="k">创建时间</div><div>${esc(o.createdAt)}</div>
+      <div class="k">需求说明</div><div>${esc(o.description)||'—'}</div>
+    </div>
+    <div style="border-top:1px solid var(--line);padding-top:14px;font-size:12px" class="muted">流程：${STATUS_FLOW.map((s,i)=>`${i<=idx?'✓':''} ${s}`).join(' → ')}</div>`,
+    `<button class="btn" onclick="closeView()">关闭</button>${next}<button class="btn primary" onclick="closeView();openOrder('${o.id}')">编辑</button>`);
+}
+async function advanceOrder(id){
+  const o=await get('orders',id);const idx=STATUS_FLOW.indexOf(o.status);
+  if(idx<0||idx>=STATUS_FLOW.length-1){toast('当前状态无法继续推进');return;}
+  o.status=STATUS_FLOW[idx+1];o.updatedAt=today();await put('orders',o);
+  await log('更新工单状态',o.code+' 进入「'+o.status+'」');
+  toast('已推进到「'+o.status+'」');closeView();renderOrders();
+}
+async function removeOrder(id){
+  if(!confirm('确定删除这个工单？'))return;
+  const o=await get('orders',id);await del('orders',id);await log('删除工单',o?o.code:id);toast('已删除');renderOrders();refreshBadge();
+}
+async function exportOrdersCSV(){
+  const orders=await all('orders');
+  if(!orders.length){toast('暂无工单可导出');return;}
+  const head=['工单编号','拍摄主题','申请部门','申请人','类型','优先级','状态','负责人','截止日期','说明'];
+  const cols=['code','title','dept','applicant','type','priority','status','assignee','dueDate','description'];
+  const csv='\ufeff'+[head.join(','),...orders.map(o=>cols.map(c=>`"${String(o[c]||'').replace(/"/g,'""')}"`).join(','))].join('\n');
+  download(new Blob([csv],{type:'text/csv;charset=utf-8'}),'拍摄工单_'+today()+'.csv');toast('CSV 已导出');
+}
+
+/* ==================== 素材库 ==================== */
+const PIE_COLORS=['#3d5afe','#12a06a','#e0912f','#8759e0','#2f8fe0','#e04a4a'];
+async function renderAssets(){
+  const assets=await all('assets');
+  const q=(document.getElementById('assetSearch').value||'').toLowerCase();
+  const cat=document.getElementById('assetCat').value;
+  let list=assets.filter(a=>(!cat||a.category===cat)&&(!q||[a.name,(a.tags||[]).join(' ')].join(' ').toLowerCase().includes(q)));
+  list.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  document.getElementById('assetCount').textContent=`共 ${list.length} 个素材`;
+  const grid=document.getElementById('assetGrid');
+  grid.innerHTML=list.length?list.map(a=>{
+    const isImg=(a.mime||'').startsWith('image');
+    return `<div class="acard" onclick="viewAsset('${a.id}')"><div class="thumb" style="background-image:${isImg&&a.dataUrl?`url('${a.dataUrl}')`:'none'}">${isImg&&a.dataUrl?'':`<svg viewBox="0 0 24 24" width="40" stroke="#b9c0d2" fill="none" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="#b9c0d2" stroke="none"/></svg>`}<span class="vbadge">${esc(a.category||'未分类')}</span></div><div class="meta"><h4>${esc(a.name)}</h4><p>${fmtSize(a.size)} · ${esc((a.createdAt||'').slice(0,10))}</p></div></div>`;
+  }).join(''):emptyHtml('暂无素材，点击上方上传');
+}
+document.getElementById('fileInput').addEventListener('change',async e=>{
+  const files=[...e.target.files];if(!files.length)return;
+  let n=0;
+  for(const f of files){
+    if(f.size>8*1024*1024){toast(f.name+' 超过 8MB，已跳过');continue;}
+    const dataUrl=await readAsDataURL(f);
+    const cat=f.type.startsWith('video')?'视频':(document.getElementById('assetCat').value||'产品摄影');
+    await put('assets',{id:uid(),name:f.name,mime:f.type,size:f.size,dataUrl,category:cat,tags:[],uploader:'管理员',createdAt:new Date().toISOString()});
+    n++;
+  }
+  await log('上传素材',n+' 个文件');toast(`已上传 ${n} 个素材`);e.target.value='';renderAssets();
+});
+function readAsDataURL(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f);});}
+function fmtSize(b){b=b||0;return b>1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB';}
+async function viewAsset(id){
+  const a=await get('assets',id);if(!a)return;
+  const isImg=(a.mime||'').startsWith('image');
+  const cats=['产品摄影','活动纪实','人物肖像','场景空间','视频'];
+  openView(a.name,`
+    <div style="text-align:center;background:#f4f6fb;border-radius:10px;padding:14px;margin-bottom:18px;min-height:200px;display:flex;align-items:center;justify-content:center">
+      ${isImg&&a.dataUrl?`<img src="${a.dataUrl}" style="max-width:100%;max-height:340px;border-radius:8px">`:`<div class="muted">视频文件：${esc(a.name)}<br><span style="font-size:12px">(${fmtSize(a.size)})</span></div>`}
+    </div>
+    <div class="detailkv">
+      <div class="k">分类</div><div><select id="v_assetCat" class="f" style="padding:5px 9px;border:1px solid var(--line);border-radius:7px">${cats.map(c=>`<option ${a.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="k">标签</div><div><input id="v_assetTags" value="${esc((a.tags||[]).join(','))}" placeholder="用逗号分隔" style="padding:6px 9px;border:1px solid var(--line);border-radius:7px;width:100%"></div>
+      <div class="k">上传者</div><div>${esc(a.uploader)}</div>
+      <div class="k">上传时间</div><div>${esc(new Date(a.createdAt).toLocaleString('zh-CN'))}</div>
+      <div class="k">文件大小</div><div>${fmtSize(a.size)}</div>
+    </div>`,
+    `<button class="btn" onclick="closeView()">关闭</button><button class="btn" onclick="saveAssetMeta('${a.id}')">保存修改</button>${a.dataUrl?`<a class="btn" href="${a.dataUrl}" download="${esc(a.name)}">下载</a>`:''}<button class="btn danger" onclick="delAsset('${a.id}')">删除</button>`,true);
+}
+async function saveAssetMeta(id){const a=await get('assets',id);a.category=document.getElementById('v_assetCat').value;a.tags=document.getElementById('v_assetTags').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);await put('assets',a);toast('已保存');closeView();renderAssets();}
+async function delAsset(id){if(!confirm('确定删除该素材？'))return;await del('assets',id);await log('删除素材',id);toast('已删除');closeView();renderAssets();}
+
+/* ==================== 拍摄计划 ==================== */
+let calY=new Date().getFullYear(),calM=new Date().getMonth();
+function calMove(n){const d=new Date(calY,calM+n,1);calY=d.getFullYear();calM=d.getMonth();renderCalendar();}
+async function renderCalendar(){
+  const plans=await all('plans');
+  document.getElementById('calTitle').textContent=calY+' 年 '+(calM+1)+' 月';
+  const first=new Date(calY,calM,1),start=(first.getDay()+6)%7,days=new Date(calY,calM+1,0).getDate();
+  const prevDays=new Date(calY,calM,0).getDate();
+  const todayStr=today();
+  let html=['一','二','三','四','五','六','日'].map(x=>`<div class="dow">${x}</div>`).join('');
+  for(let i=0;i<42;i++){
+    let day,other=false,ym;
+    if(i<start){day=prevDays-start+1+i;other=true;ym=new Date(calY,calM-1,1);}
+    else if(i>=start+days){day=i-start-days+1;other=true;ym=new Date(calY,calM+1,1);}
+    else{day=i-start+1;ym=new Date(calY,calM,1);}
+    const ds=ym.getFullYear()+'-'+String(ym.getMonth()+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    const evs=plans.filter(p=>p.date===ds);
+    const isToday=ds===todayStr;
+    html+=`<div class="calcell ${other?'other':''} ${isToday?'today':''}" onclick="addPlanOn('${ds}')"><div class="d">${day}</div>${evs.slice(0,3).map(e=>`<div class="ev" title="${esc(e.title)}">${esc(e.title)}</div>`).join('')}${evs.length>3?`<div style="font-size:10px;color:var(--muted)">+${evs.length-3} 更多</div>`:''}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML=html;
+}
+function addPlanOn(ds){openPlan(null,ds);}
+async function renderPlans(){
+  const plans=await all('plans');
+  plans.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  document.getElementById('planCount').textContent=`共 ${plans.length} 项安排`;
+  document.getElementById('planBody').innerHTML=plans.length?plans.map(p=>`<tr><td>${esc(p.date)}</td><td>${esc(p.time)}</td><td><b>${esc(p.title)}</b></td><td>${esc(p.location)}</td><td>${esc(p.assignee)}</td><td class="muted">${esc(p.crew||'—')}</td><td>${statusTag(p.status==='待拍摄'?'已排期':p.status)}</td><td><div class="act"><button onclick="openPlan('${p.id}')">编辑</button><button class="del" onclick="delPlan('${p.id}')">删除</button></div></td></tr>`).join(''):`<tr><td colspan="8">${emptyHtml('暂无拍摄计划')}</td></tr>`;
+}
+function openPlan(id,date){
+  openModal(id?'编辑拍摄计划':'新建拍摄计划',`
+    <div class="formgrid">
+      <div class="f full"><label>拍摄主题 *</label><input id="p_title"></div>
+      <div class="f"><label>日期</label><input type="date" id="p_date" value="${date||today()}"></div>
+      <div class="f"><label>时间</label><input type="time" id="p_time" value="09:00"></div>
+      <div class="f"><label>地点</label><input id="p_location"></div>
+      <div class="f"><label>负责人</label><input id="p_assignee"></div>
+      <div class="f"><label>参与人员</label><input id="p_crew" placeholder="多人用逗号分隔"></div>
+      <div class="f"><label>状态</label><select id="p_status"><option>待拍摄</option><option>拍摄中</option><option>已完成</option><option>已取消</option></select></div>
+      <div class="f full"><label>备注</label><textarea id="p_note"></textarea></div>
+    </div>`,async()=>{
+    const title=document.getElementById('p_title').value.trim();if(!title){toast('请填写拍摄主题');return false;}
+    const data={title,date:document.getElementById('p_date').value,time:document.getElementById('p_time').value,location:document.getElementById('p_location').value.trim(),assignee:document.getElementById('p_assignee').value.trim(),crew:document.getElementById('p_crew').value.trim(),status:document.getElementById('p_status').value,note:document.getElementById('p_note').value.trim()};
+    if(id){const p=await get('plans',id);Object.assign(p,data);await put('plans',p);}else await put('plans',{id:uid(),...data});
+    await log(id?'编辑计划':'新建计划',data.title);toast('已保存');closeModal();renderCalendar();renderPlans();return true;
+  });
+  if(id)get('plans',id).then(p=>{if(!p)return;['title','date','time','location','assignee','crew','status','note'].forEach(k=>document.getElementById('p_'+k).value=p[k]||'');});
+}
+async function delPlan(id){if(!confirm('确定删除该计划？'))return;await del('plans',id);await log('删除计划',id);toast('已删除');renderCalendar();renderPlans();}
+
+/* ==================== 摄影师 ==================== */
+async function renderStaff(){
+  const staff=await all('staff');
+  const colors=['#3d5afe','#12a06a','#e0912f','#8759e0','#2f8fe0','#e04a4a'];
+  document.getElementById('staffGrid').innerHTML=staff.length?staff.map((s,i)=>`<div class="card pad" style="text-align:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:${colors[i%colors.length]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;margin:0 auto 10px">${esc(s.name[0]||'?')}</div>
+    <h4 style="font-size:15px">${esc(s.name)}</h4><div class="muted" style="font-size:12px">${esc(s.role)}</div>
+    <div style="margin:10px 0">${(s.skills||[]).map(t=>`<span class="tag t-blue" style="margin:2px">${esc(t)}</span>`).join('')}</div>
+    <div class="muted" style="font-size:12px">${esc(s.phone)}</div>
+    <div style="margin-top:10px">${s.status==='在岗'?`<span class="tag t-green">${esc(s.status)}</span>`:`<span class="tag t-orange">${esc(s.status)}</span>`}</div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center"><button class="btn sm" onclick="openStaff('${s.id}')">编辑</button><button class="btn sm danger" onclick="delStaff('${s.id}')">删除</button></div>
+  </div>`).join(''):emptyHtml('暂无成员');
+}
+function openStaff(id){
+  openModal(id?'编辑成员':'添加成员',`
+    <div class="formgrid">
+      <div class="f"><label>姓名 *</label><input id="s_name"></div>
+      <div class="f"><label>职位</label><input id="s_role" placeholder="例如：高级摄影师"></div>
+      <div class="f"><label>联系电话</label><input id="s_phone"></div>
+      <div class="f"><label>状态</label><select id="s_status"><option>在岗</option><option>外勤</option><option>休假</option></select></div>
+      <div class="f full"><label>专长标签（逗号分隔）</label><input id="s_skills" placeholder="产品摄影,人物肖像"></div>
+    </div>`,async()=>{
+    const name=document.getElementById('s_name').value.trim();if(!name){toast('请填写姓名');return false;}
+    const data={name,role:document.getElementById('s_role').value.trim(),phone:document.getElementById('s_phone').value.trim(),status:document.getElementById('s_status').value,skills:document.getElementById('s_skills').value.split(/[,，]/).map(x=>x.trim()).filter(Boolean)};
+    if(id){const s=await get('staff',id);Object.assign(s,data);await put('staff',s);}else await put('staff',{id:uid(),...data});
+    toast('已保存');closeModal();renderStaff();return true;
+  });
+  if(id)get('staff',id).then(s=>{if(!s)return;document.getElementById('s_name').value=s.name;document.getElementById('s_role').value=s.role||'';document.getElementById('s_phone').value=s.phone||'';document.getElementById('s_status').value=s.status||'在岗';document.getElementById('s_skills').value=(s.skills||[]).join(',');});
+}
+async function delStaff(id){if(!confirm('确定删除该成员？'))return;await del('staff',id);toast('已删除');renderStaff();}
+
+/* ==================== 设备 ==================== */
+async function renderEquip(){
+  const eq=await all('equip');
+  document.getElementById('equipBody').innerHTML=eq.length?eq.map(e=>`<tr><td><b>${esc(e.name)}</b></td><td>${esc(e.category)}</td><td class="muted">${esc(e.model)}</td><td class="muted">${esc(e.serial)}</td><td>${e.status==='可用'?`<span class="tag t-green">${e.status}</span>`:e.status==='借出'?`<span class="tag t-orange">${e.status}</span>`:`<span class="tag t-red">${e.status}</span>`}</td><td>${esc(e.holder||'—')}</td><td class="muted">${esc(e.purchaseDate)}</td><td><div class="act"><button onclick="openEquip('${e.id}')">编辑</button><button class="del" onclick="delEquip('${e.id}')">删除</button></div></td></tr>`).join(''):`<tr><td colspan="8">${emptyHtml('暂无设备')}</td></tr>`;
+}
+function openEquip(id){
+  openModal(id?'编辑设备':'添加设备',`
+    <div class="formgrid">
+      <div class="f full"><label>设备名称 *</label><input id="e_name"></div>
+      <div class="f"><label>类别</label><select id="e_category"><option>相机</option><option>镜头</option><option>灯光</option><option>配件</option><option>航拍</option><option>其他</option></select></div>
+      <div class="f"><label>型号</label><input id="e_model"></div>
+      <div class="f"><label>序列号</label><input id="e_serial"></div>
+      <div class="f"><label>状态</label><select id="e_status"><option>可用</option><option>借出</option><option>维修中</option></select></div>
+      <div class="f"><label>当前持有人</label><input id="e_holder"></div>
+      <div class="f"><label>购入日期</label><input type="date" id="e_purchaseDate" value="${today()}"></div>
+    </div>`,async()=>{
+    const name=document.getElementById('e_name').value.trim();if(!name){toast('请填写设备名称');return false;}
+    const data={name,category:document.getElementById('e_category').value,model:document.getElementById('e_model').value.trim(),serial:document.getElementById('e_serial').value.trim(),status:document.getElementById('e_status').value,holder:document.getElementById('e_holder').value.trim(),purchaseDate:document.getElementById('e_purchaseDate').value};
+    if(id){const e=await get('equip',id);Object.assign(e,data);await put('equip',e);}else await put('equip',{id:uid(),...data});
+    toast('已保存');closeModal();renderEquip();return true;
+  });
+  if(id)get('equip',id).then(e=>{if(!e)return;['name','category','model','serial','status','holder','purchaseDate'].forEach(k=>document.getElementById('e_'+k).value=e[k]||'');});
+}
+async function delEquip(id){if(!confirm('确定删除该设备？'))return;await del('equip',id);toast('已删除');renderEquip();}
+
+/* ==================== 数据统计 ==================== */
+async function renderStats(){
+  const orders=await all('orders'),assets=await all('assets'),plans=await all('plans'),staff=await all('staff');
+  const done=orders.filter(o=>o.status==='已完成').length;
+  const rate=orders.length?Math.round(done/orders.length*100):0;
+  document.getElementById('statStats').innerHTML=[
+    ['累计工单',orders.length,'i-blue','<rect x="9" y="5" width="6" height="14" rx="1"/>',''],
+    ['完成率',rate+'%','i-green','<path d="M5 12l5 5L20 7"/>',''],
+    ['素材总量',assets.length,'i-purple','<rect x="3" y="5" width="18" height="14" rx="2"/>',''],
+    ['团队人数',staff.length,'i-orange','<circle cx="9" cy="8" r="3.5"/>','']
+  ].map(c=>`<div class="stat"><div class="ic ${c[2]}"><svg viewBox="0 0 24 24">${c[3]}</svg></div><div class="num">${c[1]}</div><div class="lbl">${c[0]}</div><div class="trend">${c[4]}</div></div>`).join('');
+  // 近6月趋势
+  const months=[];const base=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(base.getFullYear(),base.getMonth()-i,1);months.push({key:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),label:(d.getMonth()+1)+'月'});}
+  const series=months.map(m=>orders.filter(o=>(o.createdAt||'').slice(0,7)===m.key).length);
+  drawLine('trendChart',months.map(m=>m.label),series);
+  // 类型占比
+  const tc={};orders.forEach(o=>tc[o.type]=(tc[o.type]||0)+1);
+  drawPie('pieChart',tc,'pieLegend');
+  // 部门工单量
+  const dc={};orders.forEach(o=>dc[o.dept||'未填写']=(dc[o.dept||'未填写']||0)+1);
+  drawHBars('deptChart',dc);
+}
+
+/* ==================== 图表（纯 SVG，无外部依赖） ==================== */
+function drawDonut(id,data){
+  const el=document.getElementById(id);if(!el)return;
+  const entries=Object.entries(data);const total=entries.reduce((s,x)=>s+x[1],0);
+  if(!total){el.innerHTML=emptyHtml('暂无数据');return;}
+  const colors=['#3d5afe','#12a06a','#e0912f','#8759e0','#2f8fe0','#e04a4a'];
+  const cx=110,cy=115,r=70,ir=42;let a=-Math.PI/2,paths='';
+  entries.forEach(([k,v],i)=>{const ang=v/total*Math.PI*2,b=a+ang;const large=ang>Math.PI?1:0;
+    const p=(rr,t)=>[cx+rr*Math.cos(t),cy+rr*Math.sin(t)];
+    const [x1,y1]=p(r,a),[x2,y2]=p(r,b),[x3,y3]=p(ir,b),[x4,y4]=p(ir,a);
+    paths+=`<path d="M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${x3} ${y3} A${ir} ${ir} 0 ${large} 0 ${x4} ${y4} Z" fill="${colors[i%colors.length]}"/>`;a=b;});
+  const legend=entries.map(([k,v],i)=>`<div style="display:flex;align-items:center;margin-bottom:7px"><i style="width:10px;height:10px;border-radius:3px;background:${colors[i%colors.length]};display:inline-block;margin-right:8px"></i><span style="flex:1;font-size:12px">${esc(k)}</span><b style="font-size:12px">${v}</b></div>`).join('');
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;height:100%"><svg viewBox="0 0 220 230" style="width:200px;height:100%;flex:0 0 auto">${paths}<text x="110" y="110" text-anchor="middle" font-size="24" font-weight="700" fill="#1f2740">${total}</text><text x="110" y="130" text-anchor="middle" font-size="11" fill="#7b849c">工单总数</text></svg><div style="flex:1">${legend}</div></div>`;
+}
+function drawBars(id,data){
+  const el=document.getElementById(id);if(!el)return;
+  const entries=Object.entries(data);if(!entries.length){el.innerHTML=emptyHtml('暂无数据');return;}
+  const max=Math.max(...entries.map(x=>x[1]),1);const colors=PIE_COLORS;
+  const n=entries.length,bw=Math.min(56,360/n),gap=18;
+  let bars='',labels='';
+  entries.forEach(([k,v],i)=>{const h=(v/max)*150;const x=30+i*(bw+gap);
+    bars+=`<rect x="${x}" y="${180-h}" width="${bw}" height="${h}" rx="5" fill="${colors[i%colors.length]}"/><text x="${x+bw/2}" y="${174-h}" text-anchor="middle" font-size="12" font-weight="600" fill="#1f2740">${v}</text>`;
+    labels+=`<text x="${x+bw/2}" y="200" text-anchor="middle" font-size="11" fill="#7b849c">${esc(k.slice(0,5))}</text>`;});
+  el.innerHTML=`<svg viewBox="0 0 ${30+n*(bw+gap)} 215">${bars}${labels}</svg>`;
+}
+function drawPie(id,data,legendId){
+  const el=document.getElementById(id);if(!el)return;
+  const entries=Object.entries(data);const total=entries.reduce((s,x)=>s+x[1],0);
+  if(!total){el.innerHTML=emptyHtml('暂无数据');document.getElementById(legendId).innerHTML='';return;}
+  const colors=PIE_COLORS;let a=-Math.PI/2,paths='';
+  entries.forEach(([k,v],i)=>{const ang=v/total*Math.PI*2,b=a+ang,large=ang>Math.PI?1:0;
+    paths+=`<path d="M110 110 L${110+80*Math.cos(a)} ${110+80*Math.sin(a)} A80 80 0 ${large} 1 ${110+80*Math.cos(b)} ${110+80*Math.sin(b)} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`;a=b;});
+  el.innerHTML=`<svg viewBox="0 0 220 220"><circle cx="110" cy="110" r="80" fill="none"/>${paths}<circle cx="110" cy="110" r="45" fill="#fff"/><text x="110" y="106" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2740">${total}</text><text x="110" y="126" text-anchor="middle" font-size="11" fill="#7b849c">总工单</text></svg>`;
+  document.getElementById(legendId).innerHTML=entries.map(([k,v],i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(k)} ${Math.round(v/total*100)}%</span>`).join('');
+}
+function drawLine(id,labels,values){
+  const el=document.getElementById(id);if(!el)return;
+  const max=Math.max(...values,1);const W=520,H=210,left=34,right=14,top=20,bottom=34;
+  const pw=W-left-right,ph=H-top-bottom;
+  const pts=values.map((v,i)=>[left+i*(pw/(values.length-1||1)),top+ph-(v/max)*ph]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+  const area=line+` L${pts[pts.length-1][0]} ${top+ph} L${pts[0][0]} ${top+ph} Z`;
+  let grid='';for(let i=0;i<=4;i++){const y=top+ph-(i/4)*ph;grid+=`<line x1="${left}" y1="${y}" x2="${W-right}" y2="${y}" stroke="#eef0f6"/><text x="${left-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#9aa2b6">${Math.round(max*i/4)}</text>`;}
+  const dots=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#3d5afe" stroke="#fff" stroke-width="2"/><text x="${p[0]}" y="${p[1]-10}" text-anchor="middle" font-size="11" font-weight="600" fill="#1f2740">${values[i]}</text>`).join('');
+  const xl=labels.map((l,i)=>`<text x="${left+i*(pw/(labels.length-1||1))}" y="${H-10}" text-anchor="middle" font-size="11" fill="#7b849c">${esc(l)}</text>`).join('');
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${grid}<path d="${area}" fill="#eef1ff"/><path d="${line}" fill="none" stroke="#3d5afe" stroke-width="2.5"/>${dots}${xl}</svg>`;
+}
+function drawHBars(id,data){
+  const el=document.getElementById(id);if(!el)return;
+  const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]);if(!entries.length){el.innerHTML=emptyHtml('暂无数据');return;}
+  const max=Math.max(...entries.map(x=>x[1]),1);const colors=PIE_COLORS;
+  const rowH=34,H=entries.length*rowH+20;
+  let html='';entries.forEach(([k,v],i)=>{const w=v/max*300;
+    html+=`<text x="0" y="${20+i*rowH+14}" font-size="12" fill="#1f2740">${esc(k)}</text><rect x="90" y="${20+i*rowH+2}" width="320" height="16" rx="8" fill="#eef0f6"/><rect x="90" y="${20+i*rowH+2}" width="${w}" height="16" rx="8" fill="${colors[i%colors.length]}"/><text x="${100+w}" y="${20+i*rowH+15}" font-size="11" fill="#1f2740">${v}</text>`;});
+  el.innerHTML=`<svg viewBox="0 0 460 ${H}" style="height:${H}px">${html}</svg>`;
+}
+function emptyHtml(t){return `<div class="empty"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10"/></svg><div>${esc(t)}</div></div>`;}
+
+/* ==================== 全局搜索 ==================== */
+document.getElementById('globalSearch').addEventListener('input',async e=>{
+  const q=e.target.value.trim();if(!q){if(curView==='orders')renderOrders();return;}
+  go('orders');document.getElementById('ordSearch').value=q;renderOrders();
+});
+
+/* ==================== 备份 / 导入 / 设置 ==================== */
+async function renderDbInfo(){
+  const counts={};for(const s of STORES)counts[s]=(await all(s)).length;
+  const labels={orders:'拍摄工单',assets:'素材文件',plans:'拍摄计划',staff:'摄影师',equip:'设备',activity:'操作动态'};
+  document.getElementById('dbInfo').innerHTML=Object.entries(counts).map(([k,v])=>`<div class="k">${labels[k]}</div><div>${v} 条</div>`).join('')+`<div class="k">数据库</div><div>SQLite · 服务端</div><div class="k">存储位置</div><div>云端共享（跨设备）</div>`;
+}
+async function exportBackup(){
+  const dump={_meta:{app:'光影摄影部工作平台',version:1,exportedAt:new Date().toISOString()}};
+  for(const s of STORES)dump[s]=await all(s);
+  download(new Blob([JSON.stringify(dump,null,2)],{type:'application/json'}),'摄影部数据备份_'+today()+'.json');
+  await log('导出备份','完整数据');toast('备份已导出');
+}
+document.getElementById('importFile').addEventListener('change',async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{const d=JSON.parse(await f.text());
+    if(!confirm('导入会覆盖现有数据，确定继续？'))return;
+    for(const s of STORES){await clearStore(s);if(Array.isArray(d[s]))for(const o of d[s])await put(s,o);}
+    await log('导入备份',f.name);toast('导入成功');refreshAll();
+  }catch(err){toast('导入失败：文件格式不正确');}
+  e.target.value='';
+});
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+
+/* ==================== 弹窗通用 ==================== */
+let modalSave=null;
+function openModal(title,body,onSave){
+  document.getElementById('modal').className='modal';
+  document.getElementById('modal').innerHTML=`<div class="mh"><h3>${esc(title)}</h3><button class="x" onclick="closeModal()">×</button></div><div class="mb">${body}</div><div class="mf"><button class="btn" onclick="closeModal()">取消</button><button class="btn primary" id="mSave">保存</button></div>`;
+  modalSave=onSave;document.getElementById('mask').classList.add('on');
+  document.getElementById('mSave').onclick=async()=>{const r=await modalSave();if(r===false)return;};
+}
+function closeModal(){document.getElementById('mask').classList.remove('on');modalSave=null;}
+function openView(title,body,footer,wide){
+  const m=document.getElementById('viewModal');m.className=wide?'modal wide':'modal';
+  m.innerHTML=`<div class="mh"><h3>${esc(title)}</h3><button class="x" onclick="closeView()">×</button></div><div class="mb">${body}</div><div class="mf">${footer||'<button class="btn" onclick="closeView()">关闭</button>'}</div>`;
+  document.getElementById('viewMask').classList.add('on');
+}
+function closeView(){document.getElementById('viewMask').classList.remove('on');}
+document.getElementById('btnExport').onclick=exportBackup;
+
+/* ==================== 启动 ==================== */
+async function refreshBadge(){const o=await all('orders');document.getElementById('navOrders').textContent=o.length;}
+function refreshAll(){go(curView);refreshBadge();}
+(async()=>{
+  try{
+    await openDB();                 /* 探测后端 API 就绪；示例数据由后端首次启动时灌入 */
+    go('dash');refreshBadge();
+  }catch(err){console.error(err);document.querySelector('.content').innerHTML='<div class="empty"><h3>连接后端失败</h3><p class="muted">请确认后端服务已启动，然后刷新页面重试。</p></div>';}
+})();
+</script>
+</body>
+</html>
